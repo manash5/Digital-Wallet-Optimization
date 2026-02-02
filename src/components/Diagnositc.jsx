@@ -31,28 +31,33 @@ const Diagnostic = ({ data, colors }) => {
     color: networkColors[net.network] || '#9E9E9E'
   })).sort((a, b) => b.failureRate - a.failureRate);
 
-  // Correlation Analysis: Failure Rate by Device (CSV-derived)
+  // Correlation Analysis: Failure Rate by Device (CSV-derived with per-device calculation)
   const deviceColors = {
     'Android': '#3B82F6', 'iOS': '#06B6D4',
     'Feature Phone': '#F59E0B', 'Web': '#8B5CF6'
   };
 
-  const baseFailureRate = (data.summary.failedTransactions / data.summary.totalTransactions) * 100;
+  // Use device-specific failure rates from data.deviceData (calculated in csvLoader)
+  // Each device now has its own failureRate based on actual transaction failures for that device
   const failureByDevice = data.deviceData.map(dev => ({
     device: dev.device,
-    failureRate: parseFloat(baseFailureRate.toFixed(2)),
+    failureRate: dev.failureRate, // Now using per-device failure rate, not global average
+    successRate: dev.successRate,
     transactions: dev.transactions,
     color: deviceColors[dev.device] || '#9E9E9E'
-  })).sort((a, b) => b.transactions - a.transactions);
+  })).sort((a, b) => b.failureRate - a.failureRate);
 
-  // Correlation Analysis: Network Performance (CSV-derived)
-  // Using failure rate vs transaction volume correlation
-  const processingTimeByNetwork = failureByNetwork.map(net => ({
-    network: net.network,
-    processingTime: Math.round(1000 + (net.failureRate * 100)), // Estimated correlation
-    failureRate: net.failureRate,
-    transactions: net.transactions
-  }));
+  // Correlation Analysis: Network Performance (CSV-derived with actual processing time)
+  // Using actual avgTime from csvLoader instead of estimation
+  const processingTimeByNetwork = failureByNetwork.map(net => {
+    const networkDataEntry = data.networkData.find(n => n.network === net.network);
+    return {
+      network: net.network,
+      processingTime: networkDataEntry?.avgTime || Math.round(1000 + (net.failureRate * 100)), // Use actual avgTime, fallback to estimated
+      failureRate: net.failureRate,
+      transactions: net.transactions
+    };
+  });
 
   // Correlation Analysis: Success Rate by KYC Status (CSV-derived)
   const successByKYC = data.kycData.map(kyc => ({
@@ -629,8 +634,7 @@ const Diagnostic = ({ data, colors }) => {
             </BarChart>
           </ResponsiveContainer>
           <p style={{ fontSize: '12px', color: 'rgba(241,245,249,0.7)', marginTop: '16px', fontStyle: 'italic' }}>
-            💡 <strong>Insight:</strong> Feature phones have 2x higher failure rate. Android/iOS are much more stable platforms.
-          </p>
+            💡 <strong>Insight:</strong> {failureByDevice.length > 0 && failureByDevice[0].device !== failureByDevice[failureByDevice.length - 1].device && `${failureByDevice[0].device} has ${parseFloat((failureByDevice[0].failureRate / failureByDevice[failureByDevice.length - 1].failureRate).toFixed(1))}x higher failure rate than ${failureByDevice[failureByDevice.length - 1].device}.`} Device-specific optimization critical for reliability.</p>
         </motion.div>
       </div>
 
