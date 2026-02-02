@@ -451,9 +451,9 @@ export const processDashboardData = (rawData) => {
   });
 
   const kycLimits = {
-    'Full KYC': 500000,
-    'Basic KYC': 100000,
-    'Unverified': 25000
+    'Full KYC': 500000,     // NPR 500,000/month - from Data Dictionary KYC Status table
+    'Basic KYC': 100000,    // NPR 100,000/month - from Data Dictionary KYC Status table
+    'Unverified': 25000     // NPR 25,000/month - from Data Dictionary KYC Status table
   };
 
   const kycImpact = Object.entries(kycData)
