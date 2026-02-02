@@ -640,23 +640,22 @@ Festival % of Annual = (Festival Period Volume / Annual Volume) × 100`}
             🔮 4.1 Transaction Volume Forecast (2025)
           </h4>
           <p style={{ color: COLORS.textMuted, fontSize: '14px', marginBottom: '14px' }}>
-            Using historical growth rates to forecast 2025 transaction volumes with confidence intervals.
+            Linear growth projection based on historical YoY growth rates from 2022-2024 transaction data with seasonality adjustments.
           </p>
           <FormulaBox
-            formula={`2025 Forecast = 2024 Volume × (1 + Average YoY Growth Rate)
-Confidence Interval = Forecast ± (Std Dev × 1.96)
-Growth Rate = (2024 Volume - 2023 Volume) / 2023 Volume`}
-            description="Based on consistent 35%+ YoY growth observed in 2022-2024 period."
+            formula={`Average Growth = (Recent 6 Months Growth / 6)
+2025 Forecast = Baseline × (1 + Growth Rate / 100) × Seasonal Multiplier
+Variance Band = Forecast × (1 ± 0.05) for ±5% uncertainty`}
+            description="Simple linear extrapolation with hardcoded seasonal multipliers. Dashboard uses growth rate from csvLoader.js, NOT machine learning forecasting."
           />
           <ExampleBox
-            title="2025 Projection"
+            title="2025 Projection Method"
             steps={[
-              `2024 Actual: NPR 2.45 Billion (500K transactions)`,
-              `Average Growth Rate: 35.2% (2022-2024)`,
-              `Conservative Estimate (30% growth): NPR 3.19 Billion`,
-              `Base Case (35% growth): NPR 3.31 Billion`,
-              `Optimistic (40% growth): NPR 3.43 Billion`,
-              `Expected Monthly: NPR 276 Million (base case)`
+              `csvLoader.js calculates: avgGrowth = (recent 6 months change / baseline) × 100 / 6`,
+              `Predictive.jsx applies: forecast = baseline × (1 + growthRate / 100)`,
+              `Seasonal multipliers: Dashain/Tihar months × 1.25, regular months × 1.0`,
+              `Variance bands: ±5% hardcoded (NOT statistical confidence intervals)`,
+              `Result: 12-month forecast displayed in Predictive Analytics section`
             ]}
           />
         </div>
@@ -664,50 +663,51 @@ Growth Rate = (2024 Volume - 2023 Volume) / 2023 Volume`}
         {/* Growth Potential by Category */}
         <div style={{ marginBottom: '28px' }}>
           <h4 style={{ color: COLORS.accent, fontWeight: '700', fontSize: '16px', marginBottom: '16px' }}>
-            📈 4.2 Category Growth Potential & Risk Assessment
+            📈 4.2 Category Distribution Analysis
           </h4>
           <p style={{ color: COLORS.textMuted, fontSize: '14px', marginBottom: '14px' }}>
-            Identifying high-growth categories with low failure rates vs declining categories with issues.
+            Category-level transaction volume and percentage analysis from CSV data. Identifies dominant transaction types.
           </p>
           <FormulaBox
-            formula={`Growth Potential = (Current % Share × (1 + Historical Category Growth))
-Risk Level = Failure Rate × Volume Concentration
-Opportunity Score = Growth Potential - Risk Level`}
-            description="Helps prioritize resource allocation to categories with best risk-adjusted returns."
+            formula={`Category Percentage = (Category Transactions / Total Transactions) × 100
+Category Volume = Sum(amounts where category = X)
+Top Categories = Sort by percentage DESC, take top 8`}
+            description="Categories are calculated from actual CSV transaction data in csvLoader.js. No predictive modeling applied."
           />
           <ExampleBox
-            title="Category Risk-Growth Analysis"
+            title="Category Distribution (From Data Dictionary)"
             steps={[
-              `Mobile Recharge: 22.5% volume, 92.1% success, 18% annual growth = HIGH opportunity`,
-              `Fund Transfer: 15.7% volume, 85.3% success, 42% annual growth = VERY HIGH opportunity`,
-              `Utility Payments: 18.3% volume, 88.9% success, 25% annual growth = MEDIUM opportunity`,
-              `Shopping: 12.4% volume, 82.7% success, 15% annual growth = LOW opportunity`,
-              `Strategy: Invest in Fund Transfer (highest growth, moderate risk)`
+              `Utility: 36.1% (Mobile Recharge, Electricity, Internet, Water, TV/Cable)`,
+              `Transfer: 18.1% (Fund Transfer, Bank Transfer)`,
+              `Shopping: 12.3% (Online Shopping, Grocery)`,
+              `Merchant: 8.1% (QR Payment at stores/restaurants)`,
+              `Analysis shows top categories from csvLoader.categoryData array`
             ]}
           />
         </div>
 
-        {/* Risk Prediction */}
+        {/* Multi-Dimensional Analysis */}
         <div style={{ marginBottom: '28px' }}>
           <h4 style={{ color: COLORS.danger, fontWeight: '700', fontSize: '16px', marginBottom: '16px' }}>
-            ⚠️ 4.3 Transaction Risk Prediction Model
+            ⚠️ 4.3 Multi-Dimensional Performance Radar
           </h4>
           <p style={{ color: COLORS.textMuted, fontSize: '14px', marginBottom: '14px' }}>
-            ML-based risk scoring combining user, device, network, and transaction characteristics.
+            Radar chart visualization comparing Growth Potential vs Risk Level across 5 dimensions using actual CSV-derived metrics.
           </p>
           <FormulaBox
-            formula={`Risk Score = (Unverified KYC × 35%) + (Poor Network × 25%) + 
-             (Unusual Device × 20%) + (High Amount × 15%) + (Velocity Check × 5%)
-Risk Category = 'High' if Score > 75, 'Medium' if 50-75, 'Low' if < 50`}
-            description="Enables real-time fraud prevention and risk-based authentication challenges."
+            formula={`Dimensions: Category Growth, District Expansion, User Engagement, Success Rate, Technology Adoption
+Growth Potential = Positive opportunity metrics (higher = better)
+Risk Level = Areas needing attention (higher = more concern)`}
+            description="Predictive.jsx calculates these from real data: top category %, district distribution, user segments, failure rate, device adoption."
           />
           <ExampleBox
-            title="Risk Score Examples"
+            title="Radar Chart Metrics (All from CSV Data)"
             steps={[
-              `Low Risk: Full KYC user, WiFi connection, iOS device, NPR 500 txn = Score 12%`,
-              `Medium Risk: Basic KYC user, 4G connection, Android, NPR 15K txn = Score 58%`,
-              `High Risk: Unverified user, 2G connection, Feature phone, NPR 50K txn = Score 89%`,
-              `Recommended Action: High risk = 2FA, Medium = OTP, Low = Allow immediately`
+              `Category Growth: Top category % × 1.2 (growth potential)`,
+              `District Expansion: (100 - top district %) shows expansion room`,
+              `User Engagement: Regular user segment % from userSegments data`,
+              `Success Rate: (100 - failure rate) from actual transaction status`,
+              `Technology: Smartphone adoption % from deviceData`
             ]}
           />
         </div>
@@ -738,14 +738,13 @@ Payback Period = Cost / (Monthly Recurring Benefit)`}
             description="Each upgraded user generates 40-60% more transaction volume at higher success rates."
           />
           <ExampleBox
-            title="KYC Upgrade Business Case"
+            title="KYC Upgrade Business Case (Illustrative)"
             steps={[
-              `Target: 24,000 Basic KYC users (32% of 75K total)`,
-              `Campaign Cost: 24,000 × NPR 200 verification fee = NPR 4.8 Million`,
-              `Success Rate Before: 85.7% → After: 92.1% (+6.4 percentage points)`,
-              `Additional Successful Txns: 24,000 users × 50 txns/month × 6.4% = 76,800 extra txns`,
-              `Revenue Impact: 76,800 × NPR 1.5 fee = NPR 115,200 monthly`,
-              `Payback Period: NPR 4.8M / NPR 115.2K = 41.7 months (strong long-term ROI)`
+              `Data Dictionary: Basic KYC = 40%, Unverified = 15% of users`,
+              `Prescriptive.jsx calculates: cost = totalUsers × (basic% + unverified%) × NPR 200`,
+              `Benefit calculation: upgraded users × 30% increase × NPR 50K/month × 1.5% fee`,
+              `ROI formula: (benefit - cost) / cost × 100`,
+              `Actual values vary based on live CSV data in data.summary.totalUsers`
             ]}
           />
         </div>
@@ -793,15 +792,14 @@ Surge Period Benefit = Additional Volume × Fee Rate`}
             description="Festival periods are high-revenue, high-risk windows requiring careful capacity planning."
           />
           <ExampleBox
-            title="Festival Surge Analysis"
+            title="Festival Surge Analysis (Based on Data Dictionary)"
             steps={[
-              `Normal Daily Volume: NPR 8.15 Million / day`,
-              `Festival Surge Volume: NPR 8.15M × 1.32 = NPR 10.8 Million / day`,
-              `Additional Daily Volume: NPR 2.65 Million during 15-day Dashain period`,
-              `Total Festival Surplus: 15 days × NPR 2.65M = NPR 39.75 Million`,
-              `Revenue at 1.5% fee: NPR 596,250 per festival (Dashain + Tihar = NPR 1.2M+ annually)`,
-              `Capacity Cost (estimated): NPR 8-10 Million for temporary infrastructure`,
-              `Net Benefit: NPR 400K+ after capacity costs (high-value investment)`
+              `Data Dictionary: Transaction amounts 50% higher during Dashain and Tihar`,
+              `Dashain: 15-day period (Oct 3-17, 2024 example)`,
+              `Tihar: 5-day period (Oct 31-Nov 4, 2024 example)`,
+              `Prescriptive.jsx: festivalScalingCost = totalVolume × 0.5 × 0.002`,
+              `Benefit = surge transactions × avgTransaction × 1.5% fee`,
+              `Temporal.jsx shows actual festivalImpact from CSV data`
             ]}
           />
         </div>
@@ -821,16 +819,13 @@ Network Costs = Merchant Integration × Training × QR Generation`}
             description="Shopping category has lowest success rate (82.7%). QR expansion drives frictionless payments."
           />
           <ExampleBox
-            title="Merchant QR Expansion ROI"
+            title="Merchant QR Expansion ROI (Illustrative Scenario)"
             steps={[
-              `Kathmandu Valley Population: 2.5 Million`,
-              `Estimated Merchants: 50,000 small-medium businesses`,
-              `Current QR Integration: 8,000 merchants (16% penetration)`,
-              `Target: 25,000 merchants (50% penetration) in 18 months`,
-              `Cost: 17,000 new merchants × NPR 500/merchant = NPR 8.5 Million`,
-              `Incremental Txns: 17,000 merchants × 20 txns/month = 340K monthly new shopping txns`,
-              `Revenue: 340K × NPR 2,500 avg × 1.5% fee = NPR 12.75M monthly`,
-              `Payback Period: 8.5M / 12.75M = 7 months (excellent ROI)`
+              `Data Dictionary: Merchant category = 8.1% of transactions`,
+              `Shopping category = 12.3% of transactions`,
+              `Prescriptive.jsx: qrNetworkCost = merchantTransactions × 0.001`,
+              `qrBenefit = merchantTransactions × 28% growth × 1.5% fee`,
+              `ROI = (benefit / cost) × 100, calculated from actual CSV volumes`
             ]}
           />
         </div>
@@ -855,44 +850,43 @@ Network Costs = Merchant Integration × Training × QR Generation`}
           </p>
           <FormulaBox
             formula={`District Market Share = (District Transactions / Total Transactions) × 100
-Herfindahl Index = Σ(Market Share %)²
-Concentration Level: < 2500 = Competitive, 2500-3500 = Moderate, > 3500 = Concentrated`}
-            description="Reveals geographic concentration and expansion opportunities in underserved districts."
+District Volume = Sum(amounts where district = X)
+District Success Rate = (Successful Txns / Total Txns) × 100`}
+            description="Geographic.jsx calculates district metrics from csvLoader.districtData array. Shows concentration across Kathmandu, Lalitpur, Bhaktapur."
           />
           <ExampleBox
-            title="Geographic Distribution"
+            title="Geographic Distribution (From CSV Data)"
             steps={[
-              `Kathmandu District: 58.2% of transactions (291K txns), NPR 2.68 Billion volume`,
-              `Lalitpur District: 28.5% of transactions (142.5K txns), NPR 1.31 Billion volume`,
-              `Bhaktapur District: 13.3% of transactions (66.5K txns), NPR 0.62 Billion volume`,
-              `Total Population: 2.5 Million, Penetration: 3% (growth potential: 10x)`,
-              `Herfindahl Index: 3,954 (moderately concentrated, indicates growth opportunities)`
+              `Data Dictionary: Kathmandu, Lalitpur, Bhaktapur districts in Kathmandu Valley`,
+              `Total Users: 75,000 across all three districts`,
+              `csvLoader.js: districtDistribution aggregates by district field`,
+              `Geographic.jsx maps to districtMetrics with percentages and volumes`,
+              `Actual percentages calculated from 500K transactions in CSV`
             ]}
           />
         </div>
 
-        {/* Market Scoring & Expansion Strategy */}
+        {/* District-Level Metrics */}
         <div style={{ marginBottom: '28px' }}>
           <h4 style={{ color: COLORS.success, fontWeight: '700', fontSize: '16px', marginBottom: '16px' }}>
-            📊 6.2 Market Scoring Formula
+            📊 6.2 District-Level Transaction Metrics
           </h4>
           <p style={{ color: COLORS.textMuted, fontSize: '14px', marginBottom: '14px' }}>
-            Quantitative scoring of district attractiveness based on volume, growth, and success rates.
+            Breakdown of transaction volume, percentage share, and counts across the three Kathmandu Valley districts.
           </p>
           <FormulaBox
-            formula={`Market Score = (Volume % × 40) + (Growth Rate × 30) + (Success Rate × 20) + (User Growth × 10)
-Attractiveness = 'High' if > 75, 'Medium' if 50-75, 'Low' if < 50`}
-            description="Guides investment decisions for merchant partnerships and infrastructure expansion."
+            formula={`District Percentage = (District Txns / Total Txns) × 100
+District Volume = Sum(successful transaction amounts)
+District Avg = District Volume / District Txns`}
+            description="Geographic.jsx displays bar charts and comparison tables using districtData from csvLoader.js."
           />
           <ExampleBox
-            title="Market Attractiveness Scoring"
+            title="District Analysis Components"
             steps={[
-              `Kathmandu: Score 82/100 (mature market, saturation approaching)`,
-              `  - Volume: 58.2% (58.2 pts), Growth: 38% (11.4 pts), Success: 90% (18 pts), User Growth: 8% (0.8 pts)`,
-              `Lalitpur: Score 71/100 (high-growth opportunity)`,
-              `  - Volume: 28.5% (28.5 pts), Growth: 52% (15.6 pts), Success: 87% (17.4 pts), User Growth: 15% (1.5 pts)`,
-              `Bhaktapur: Score 54/100 (emerging market, infrastructure needed)`,
-              `  - Volume: 13.3% (13.3 pts), Growth: 45% (13.5 pts), Success: 82% (16.4 pts), User Growth: 12% (1.2 pts)`
+              `Transaction Volume Data: Horizontal bar chart by district`,
+              `District Comparison: Grouped bars showing transactions vs volume vs avg amount`,
+              `Top locations identified within each district from CSV location field`,
+              `Data comes from csvLoader.districtDistribution aggregation`
             ]}
           />
         </div>
@@ -912,12 +906,13 @@ Success Predictor = Base Rate + (Network Quality × 0.3) - (Unverified KYC % × 
             description="District success rates driven by network infrastructure and user KYC profile."
           />
           <ExampleBox
-            title="District Success Drivers"
+            title="District Success Analysis (From CSV)"
             steps={[
-              `Kathmandu (90% success): 85% 4G users, 45% Full KYC, urban density = HIGH infrastructure`,
-              `Lalitpur (87% success): 72% 4G users, 38% Full KYC, semi-urban = MODERATE infrastructure`,
-              `Bhaktapur (82% success): 55% 4G users, 28% Full KYC, rural areas = LOW infrastructure`,
-              `Key Finding: 4G rollout would improve Bhaktapur success rate by 5-8%`
+              `Data Dictionary: Network types include NTC 4G (30%), Ncell 4G (28%), WiFi (20%)`,
+              `KYC Distribution: Full KYC (45%), Basic KYC (40%), Unverified (15%)`,
+              `Success rate calculated: (successful txns / total txns) × 100 per district`,
+              `Geographic.jsx compares districts using actual transaction status from CSV`,
+              `Network and KYC correlations visible in Diagnostic Analytics section`
             ]}
           />
         </div>
@@ -1073,12 +1068,12 @@ Success Predictor = Base Rate + (Network Quality × 0.3) - (Unverified KYC % × 
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           {[
-            { title: 'Growth Momentum', desc: '35%+ YoY growth demonstrates strong market expansion. 2025 projected at NPR 3.3B (+35% from 2024).' },
-            { title: 'Success Rate Gap', desc: '88.24% success rate leaves 11.76% (58,800 txns) recoverable. KYC upgrades and network improvements critical.' },
-            { title: 'Festival Opportunity', desc: 'Dashain & Tihar generate 18-22% annual volume. Infrastructure scaling required for seasonal spikes.' },
-            { title: 'Geographic Expansion', desc: 'Kathmandu dominates 58.2%. High growth in Lalitpur (52% YoY) and Bhaktapur (45% YoY).' },
-            { title: 'Risk Management', desc: 'Unverified KYC users (13%) show 72% success rate. Campaigns to upgrade can recover 15K+ monthly txns.' },
-            { title: 'ROI Winners', desc: 'QR merchant expansion (7-mo payback), KYC campaigns (41-mo payback), Network upgrades (12-mo payback).' }
+            { title: 'Dataset Scope', desc: '500,000 transactions from 75,000 users across Kathmandu Valley. Total volume: NPR 4.61 Billion (2022-2024).' },
+            { title: 'Success Rate', desc: 'Data Dictionary: 88.28% success rate. 58,586 failed transactions analyzed by failure_reason field for optimization.' },
+            { title: 'Festival Impact', desc: 'Data shows transaction amounts 50% higher during Dashain (15 days) and Tihar (5 days). Critical scaling periods.' },
+            { title: 'Category Leaders', desc: 'Utility (36.1%), Transfer (18.1%), Shopping (12.3%), Merchant (8.1%) dominate transaction categories.' },
+            { title: 'KYC Distribution', desc: 'Full KYC: 45% (NPR 500K limit), Basic: 40% (NPR 100K limit), Unverified: 15% (NPR 25K limit) per data dictionary.' },
+            { title: 'Growth Projections', desc: 'Linear forecasting uses csvLoader growth rates. Prescriptive interventions calculate ROI from actual CSV volumes.' }
           ].map((item, idx) => (
             <motion.div
               key={idx}
